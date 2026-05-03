@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey Insights – PathBridge</title>
+  <meta name="description" content="Field survey insights on rural student career awareness conducted by PathBridge." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">PathBridge</a>
+  <div class="navbar-links">
+    <a href="index.html">← Home</a>
+    <a href="quiz.html">Take Quiz</a>
+  </div>
+</nav>
+
+<div class="page-wrap" style="padding-top: 100px; gap: 24px;">
+
+  <div class="card card-wide" style="animation-delay:0.05s;">
+    <span class="section-badge">📋 Research Data</span>
+    <h2 class="section-title" style="margin-top:12px;">Field Survey Insights</h2>
+    <p class="text-muted">Survey conducted among 30 rural government school students in Tamil Nadu.</p>
+
+    <!-- Stat Cards -->
+    <div class="survey-stat-grid mt-24">
+      <div class="survey-stat-card">
+        <div class="big-num">70%</div>
+        <p>Unaware of diploma & vocational pathways</p>
+      </div>
+      <div class="survey-stat-card">
+        <div class="big-num" style="color: var(--accent-purple)">60%</div>
+        <p>Unaware of scholarship portals</p>
+      </div>
+      <div class="survey-stat-card">
+        <div class="big-num" style="color: var(--accent-cyan)">75%</div>
+        <p>Depend only on family advice for career decisions</p>
+      </div>
+      <div class="survey-stat-card">
+        <div class="big-num" style="color: var(--accent-amber)">55%</div>
+        <p>Concerned about cost of higher education</p>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Awareness Bar Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Career Awareness Level by Topic (%)</div>
+      <div class="bar-chart" id="awarenessChart"></div>
+    </div>
+
+    <!-- Career Interest Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Career Interest Distribution Among Students (%)</div>
+      <div class="bar-chart" id="interestChart"></div>
+    </div>
+
+    <!-- Barrier Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Biggest Barriers to Higher Education (%)</div>
+      <div class="bar-chart" id="barrierChart"></div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="gap-12">
+      <a href="quiz.html" class="btn btn-primary">🧠 Take Career Quiz</a>
+      <a href="index.html" class="btn btn-outline">🏠 Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function buildBarChart(id, rows) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="bar-label">
+        <span>${r.label}</span>
+        <span>${r.value}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" data-target="${r.pct}%" style="width:0%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+buildBarChart('awarenessChart', [
+  { label: "Higher Education Options", pct: 60, value: "60%" },
+  { label: "Government Exams (UPSC/TNPSC)", pct: 72, value: "72%" },
+  { label: "Skill / Vocational Courses", pct: 45, value: "45%" },
+  { label: "Entrepreneurship", pct: 35, value: "35%" },
+  { label: "Agriculture Careers", pct: 40, value: "40%" },
+  { label: "Scholarship Portals", pct: 40, value: "40%" },
+]);
+
+buildBarChart('interestChart', [
+  { label: "Engineering & Technology", pct: 38, value: "38%" },
+  { label: "Government / Defence", pct: 25, value: "25%" },
+  { label: "Medical / Healthcare",     pct: 18, value: "18%" },
+  { label: "Commerce & Finance",       pct: 12, value: "12%" },
+  { label: "Arts & Social Work",       pct: 7,  value: "7%"  },
+]);
+
+buildBarChart('barrierChart', [
+  { label: "Financial Constraints",    pct: 65, value: "65%" },
+  { label: "Lack of Guidance",         pct: 70, value: "70%" },
+  { label: "No Internet Access",       pct: 45, value: "45%" },
+  { label: "Language Barrier",         pct: 38, value: "38%" },
+  { label: "Family Pressure",          pct: 50, value: "50%" },
+]);
+
+setTimeout(() => {
+  document.querySelectorAll('.bar-fill').forEach(el => {
+    el.style.width = el.dataset.target;
+  });
+}, 300);
+</script>
+
+  <footer class="site-footer">
+    <div class="footer-card">
+      <p>Want to act on these insights? Return home or take the career quiz next.</p>
+      <div class="footer-actions">
+        <a href="index.html" class="btn btn-outline">🏠 Home</a>
+        <a href="quiz.html" class="btn btn-primary">Take Quiz</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

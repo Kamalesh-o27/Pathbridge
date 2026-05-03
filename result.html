@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Results & Analytics – PathBridge</title>
+  <meta name="description" content="Personalized career recommendations, course options, and college analytics based on your PathBridge quiz results." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">PathBridge</a>
+  <div class="navbar-links">
+    <a href="index.html">← Home</a>
+    <a href="quiz.html">← Retake Quiz</a>
+    <a href="https://chooseyourcollege.com/home" target="_blank">Find College</a>
+  </div>
+</nav>
+
+<div class="page-wrap" style="padding-top: 100px; gap: 24px;">
+
+  <!-- Result Hero -->
+  <div class="card card-wide" style="animation-delay:0.05s;">
+    <div class="result-hero">
+      <span class="section-badge">🎯 Your Personalized Results</span>
+      <h1 class="page-title" style="font-size: clamp(1.5rem,4vw,2.4rem); margin-top: 12px;" id="resultHeadline">Calculating your matches…</h1>
+      <p class="subtitle" style="margin: 0 auto;" id="resultSub">Based on your quiz responses, here are your best-fit career paths and courses.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-row mt-32" id="tabRow">
+      <button class="tab-btn active" onclick="showTab('careers', this)" id="tab-careers">🚀 Careers</button>
+      <button class="tab-btn" onclick="showTab('courses', this)" id="tab-courses">📚 Courses</button>
+      <button class="tab-btn" onclick="showTab('analytics', this)" id="tab-analytics">📊 Analytics</button>
+    </div>
+
+    <!-- TAB: Careers -->
+    <div class="tab-pane active" id="pane-careers">
+      <p class="text-muted mt-8" style="margin-bottom: 20px;">Click a role to view salary trend data and a step-by-step roadmap for that career.</p>
+      <div class="career-grid" id="careerGrid">
+        <p class="text-muted">Loading…</p>
+      </div>
+    </div>
+
+    <!-- TAB: Courses -->
+    <div class="tab-pane" id="pane-courses">
+      <p class="text-muted mt-8" style="margin-bottom: 20px;">Top recommended courses based on your background and goals</p>
+      <div class="course-grid" id="courseGrid">
+        <p class="text-muted">Loading…</p>
+      </div>
+    </div>
+
+    <!-- TAB: Analytics -->
+    <div class="tab-pane" id="pane-analytics">
+      <div class="analytics-section">
+
+        <!-- Salary Bar Chart -->
+        <div class="chart-container">
+          <div class="chart-title">Estimated Salary Range (LPA)</div>
+          <div class="bar-chart" id="salaryChart"></div>
+        </div>
+
+        <!-- Growth Potential -->
+        <div class="chart-container">
+          <div class="chart-title">5-Year Industry Growth Potential</div>
+          <div class="bar-chart" id="growthChart"></div>
+        </div>
+
+        <!-- Job Demand -->
+        <div class="chart-container">
+          <div class="chart-title">Job Market Demand Score (out of 10)</div>
+          <div class="bar-chart" id="demandChart"></div>
+        </div>
+
+      </div>
+    </div>
+
+
+  </div>
+
+  <div class="modal-overlay" id="roleModal" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalTitle">Role Insight</h3>
+          <p id="modalSubtitle">Salary trend and roadmap details.</p>
+        </div>
+        <button class="modal-close" type="button" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Action row -->
+  <div class="gap-12" style="justify-content: center; padding-bottom: 40px;">
+    <a href="quiz.html" class="btn btn-outline">🔄 Retake Quiz</a>
+    <a href="index.html" class="btn btn-outline">🏠 Home</a>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-card">
+      <p>Need a quick reset? Return home or retake the quiz to refresh your recommendations.</p>
+      <div class="footer-actions">
+        <a href="index.html" class="btn btn-outline">🏠 Home</a>
+        <a href="quiz.html" class="btn btn-primary">Retake Quiz</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ──────────────── DATA TABLES ────────────────
+
+const careerDB = [
+  // TECH / MATHS
+  { name: "Software Engineer",       field: "tech",     subject:["maths"],     salary: "₹6–15 LPA",  growth: 85, demand: 9.2, tags:["IT","Private"] },
+  { name: "Data Scientist",          field: "tech",     subject:["maths"],     salary: "₹8–20 LPA",  growth: 92, demand: 9.5, tags:["AI/ML","Private"] },
+  { name: "AI / ML Engineer",        field: "tech",     subject:["maths"],     salary: "₹10–25 LPA", growth: 96, demand: 9.7, tags:["AI","Private"] },
+  { name: "Cybersecurity Analyst",   field: "tech",     subject:["maths"],     salary: "₹6–14 LPA",  growth: 80, demand: 8.8, tags:["Security","Private"] },
+  { name: "Cloud Engineer",          field: "tech",     subject:["maths"],     salary: "₹7–18 LPA",  growth: 88, demand: 9.0, tags:["Cloud","Private"] },
+  // CREATIVE
+  { name: "UI/UX Designer",          field: "creative", subject:["arts","maths"],salary:"₹5–12 LPA", growth: 72, demand: 8.0, tags:["Design","Private"] },
+  { name: "Graphic Designer",        field: "creative", subject:["arts"],       salary:"₹3–8 LPA",  growth: 55, demand: 7.0, tags:["Design","Private"] },
+  { name: "Video Editor / Animator", field: "creative", subject:["arts"],       salary:"₹3–10 LPA", growth: 63, demand: 7.5, tags:["Media","Freelance"] },
+  { name: "Architect",               field: "creative", subject:["arts","maths"],salary:"₹5–15 LPA", growth: 65, demand: 7.8, tags:["Design","Private"] },
+  // BUSINESS
+  { name: "Chartered Accountant",    field: "business", subject:["commerce"],   salary:"₹8–20 LPA", growth: 70, demand: 8.5, tags:["Finance","Private"] },
+  { name: "Investment Banker",       field: "business", subject:["commerce"],   salary:"₹12–30 LPA",growth: 75, demand: 8.2, tags:["Finance","Private"] },
+  { name: "Business Analyst",        field: "business", subject:["commerce"],   salary:"₹6–15 LPA", growth: 80, demand: 8.6, tags:["Management","Private"] },
+  { name: "Entrepreneur",            field: "business", subject:["commerce"],   salary:"High Potential",growth:88, demand:8.0,tags:["Self-employed"] },
+  { name: "Digital Marketer",        field: "business", subject:["commerce","arts"],salary:"₹4–10 LPA",growth:78, demand:8.3,tags:["Marketing","Private"] },
+  // PRACTICAL
+  { name: "Mechanical Technician",   field: "practical",subject:["vocational"], salary:"₹3–6 LPA",  growth: 45, demand: 7.0, tags:["ITI","Govt/Pvt"] },
+  { name: "Electrician / EE Tech",   field: "practical",subject:["vocational"], salary:"₹3–8 LPA",  growth: 50, demand: 7.2, tags:["ITI","Govt/Pvt"] },
+  { name: "Automobile Engineer",     field: "practical",subject:["vocational","science"],salary:"₹4–9 LPA",growth:55, demand:7.5,tags:["Auto","Private"] },
+  { name: "Civil Engineer",          field: "practical",subject:["maths","science"],salary:"₹4–10 LPA",growth:58, demand:7.8,tags:["Construction","Pvt/Govt"] },
+  // SOCIAL
+  { name: "Teacher / Educator",      field: "social",   subject:["arts","commerce"],salary:"₹3–8 LPA",growth:50, demand:8.0,tags:["Education","Govt/Pvt"] },
+  { name: "Nurse / Healthcare",      field: "social",   subject:["science"],    salary:"₹4–9 LPA",  growth: 65, demand: 8.5, tags:["Medical","Govt/Pvt"] },
+  { name: "Psychologist",            field: "social",   subject:["arts"],       salary:"₹5–12 LPA", growth: 70, demand: 7.8, tags:["Health","Private"] },
+  { name: "Social Worker / NGO",     field: "social",   subject:["arts"],       salary:"₹3–7 LPA",  growth: 48, demand: 6.5, tags:["Social","NGO"] },
+  // GOVERNMENT
+  { name: "IAS / IPS Officer",       field: "govt",     subject:["arts","commerce","maths"],salary:"₹8–15 LPA+",growth:60, demand:9.0,tags:["Civil Services","Govt"] },
+  { name: "Police Officer",          field: "govt",     subject:["arts"],       salary:"₹4–10 LPA", growth: 40, demand: 8.5, tags:["Govt"] },
+  { name: "SSC / Bank Officer",      field: "govt",     subject:["commerce","maths"],salary:"₹4–9 LPA",growth:45, demand:8.8,tags:["Banking","Govt"] },
+  { name: "Defence (Army/Navy/AF)",  field: "govt",     subject:["science","maths"],salary:"₹6–14 LPA",growth:50, demand:8.3,tags:["Defence","Govt"] },
+  { name: "ISRO / DRDO Scientist",   field: "govt",     subject:["science","maths"],salary:"₹8–18 LPA",growth:75, demand:8.0,tags:["Research","Govt"] },
+];
+
+const courseDB = {
+  tech:     [
+    { icon:"💻", name:"B.E. / B.Tech (CS/IT)",         desc:"4-year engineering degree, gateway to software & AI careers.", duration:"4 years" },
+    { icon:"🤖", name:"B.Sc. Data Science / AI",        desc:"Focused BSc on machine learning, data analysis, and AI.", duration:"3 years" },
+    { icon:"☁️", name:"Cloud Computing Diploma",         desc:"AWS/Azure/GCP certifications, high demand globally.", duration:"6 months–1 year" },
+    { icon:"🔒", name:"Cybersecurity Certification",    desc:"CEH, CompTIA Security+ for cybersecurity careers.", duration:"6 months" },
+  ],
+  creative: [
+    { icon:"🎨", name:"B.Des (Design)",                 desc:"Bachelor in Design — product, graphic, UI/UX specializations.", duration:"4 years" },
+    { icon:"📱", name:"Diploma in UI/UX Design",        desc:"Practical course in Figma, wireframing, prototyping.", duration:"1 year" },
+    { icon:"🎬", name:"B.Sc. Animation & VFX",          desc:"Visual effects, motion graphics, 3D modeling.", duration:"3 years" },
+    { icon:"🏗️", name:"B.Arch (Architecture)",          desc:"Five-year professional architecture degree.", duration:"5 years" },
+  ],
+  business: [
+    { icon:"📊", name:"B.Com / BBA",                    desc:"Core commerce and business administration degree.", duration:"3 years" },
+    { icon:"💼", name:"CA (Chartered Accountancy)",     desc:"India's premier finance qualification via ICAI.", duration:"3–5 years" },
+    { icon:"📈", name:"BMS / MBA (Finance)",             desc:"Business management with finance specialization.", duration:"3+2 years" },
+    { icon:"🛒", name:"Digital Marketing Course",       desc:"Google, Meta certifications for online marketing.", duration:"3–6 months" },
+  ],
+  practical:[
+    { icon:"⚙️", name:"B.E. Mechanical Engineering",   desc:"Core mechanical engineering for manufacturing & auto.", duration:"4 years" },
+    { icon:"⚡", name:"B.E. Electrical Engineering",    desc:"Power systems, electronics, embedded systems.", duration:"4 years" },
+    { icon:"🏗️", name:"B.E. Civil Engineering",         desc:"Construction, infrastructure, urban planning.", duration:"4 years" },
+    { icon:"🛠️", name:"ITI / Polytechnic Diploma",      desc:"Hands-on technical training for immediate employment.", duration:"1–3 years" },
+  ],
+  social:   [
+    { icon:"👩‍🏫", name:"B.Ed. (Bachelor of Education)","desc":"Become a certified teacher in schools.", duration:"2 years" },
+    { icon:"🏥", name:"B.Sc. Nursing",                  desc:"Professional nursing degree for hospitals and clinics.", duration:"4 years" },
+    { icon:"🧠", name:"B.A./M.A. Psychology",           desc:"Understand human behavior, pursue counselling.", duration:"3–5 years" },
+    { icon:"🤲", name:"B.S.W. (Social Work)",           desc:"Bachelor in Social Work for NGO and community roles.", duration:"3 years" },
+  ],
+  govt:     [
+    { icon:"🏛️", name:"B.A. Political Science / History","desc":"Foundation for UPSC Civil Services preparation.", duration:"3 years" },
+    { icon:"⚔️", name:"NDA / CDS (Defence)",             desc:"National Defence Academy for Army, Navy, Air Force.", duration:"3 years" },
+    { icon:"📚", name:"UPSC / TNPSC Coaching",           desc:"Structured preparation program for govt exams.", duration:"1–2 years" },
+    { icon:"🏦", name:"IBPS / SBI Bank Exam Prep",       desc:"Bank PO and Clerk exam preparation courses.", duration:"6 months" },
+  ],
+};
+
+const salaryData = [
+  { label: "AI / ML Engineer",      min: 10, max: 25, color: "var(--accent-blue)" },
+  { label: "Data Scientist",        min: 8,  max: 20, color: "var(--accent-purple)" },
+  { label: "Software Engineer",     min: 6,  max: 15, color: "var(--accent-cyan)" },
+  { label: "Chartered Accountant",  min: 8,  max: 20, color: "var(--accent-green)" },
+  { label: "Civil Engineer",        min: 4,  max: 10, color: "var(--accent-amber)" },
+];
+
+const growthData = [
+  { label: "AI/ML",          pct: 96 },
+  { label: "Cloud Computing",pct: 88 },
+  { label: "Digital Marketing",pct:78 },
+  { label: "Healthcare",     pct: 65 },
+  { label: "Civil / Infra",  pct: 58 },
+];
+
+const demandData = [
+  { label: "AI Engineer",        score: 9.7 },
+  { label: "Data Scientist",     score: 9.5 },
+  { label: "Cloud Engineer",     score: 9.0 },
+  { label: "Cybersecurity",      score: 8.8 },
+  { label: "Business Analyst",   score: 8.6 },
+];
+
+const salaryTrend = {
+  "AI / ML Engineer": [
+    { year: 2019, value: 8 },
+    { year: 2020, value: 9.5 },
+    { year: 2021, value: 12 },
+    { year: 2022, value: 16 },
+    { year: 2023, value: 20 }
+  ],
+  "Data Scientist": [
+    { year: 2019, value: 7 },
+    { year: 2020, value: 8.5 },
+    { year: 2021, value: 10 },
+    { year: 2022, value: 13 },
+    { year: 2023, value: 17 }
+  ],
+  "Software Engineer": [
+    { year: 2019, value: 5 },
+    { year: 2020, value: 6 },
+    { year: 2021, value: 8 },
+    { year: 2022, value: 11 },
+    { year: 2023, value: 14 }
+  ],
+  "Chartered Accountant": [
+    { year: 2019, value: 6 },
+    { year: 2020, value: 7 },
+    { year: 2021, value: 9 },
+    { year: 2022, value: 12 },
+    { year: 2023, value: 15 }
+  ],
+  "Civil Engineer": [
+    { year: 2019, value: 3.5 },
+    { year: 2020, value: 4 },
+    { year: 2021, value: 5 },
+    { year: 2022, value: 6 },
+    { year: 2023, value: 8 }
+  ],
+  "Cybersecurity Analyst": [
+    { year: 2019, value: 5 },
+    { year: 2020, value: 5.8 },
+    { year: 2021, value: 6.8 },
+    { year: 2022, value: 8.2 },
+    { year: 2023, value: 9.4 }
+  ],
+  "Cloud Engineer": [
+    { year: 2019, value: 6 },
+    { year: 2020, value: 7 },
+    { year: 2021, value: 8.5 },
+    { year: 2022, value: 10 },
+    { year: 2023, value: 12 }
+  ],
+  "UI/UX Designer": [
+    { year: 2019, value: 4 },
+    { year: 2020, value: 5 },
+    { year: 2021, value: 6 },
+    { year: 2022, value: 7.5 },
+    { year: 2023, value: 9 }
+  ],
+  "Graphic Designer": [
+    { year: 2019, value: 2.5 },
+    { year: 2020, value: 3 },
+    { year: 2021, value: 4 },
+    { year: 2022, value: 5.5 },
+    { year: 2023, value: 7 }
+  ],
+  "Nurse / Healthcare": [
+    { year: 2019, value: 3 },
+    { year: 2020, value: 3.5 },
+    { year: 2021, value: 4 },
+    { year: 2022, value: 5 },
+    { year: 2023, value: 6.5 }
+  ]
+};
+
+const careerRoadmaps = {
+  "AI / ML Engineer": {
+    steps: [
+      "Learn Python and statistics",
+      "Build ML projects and datasets",
+      "Practice deployment and MLOps",
+      "Intern or contribute to real AI projects",
+      "Prepare for interviews with case studies"
+    ],
+    skills: ["Python", "Machine Learning", "Data Analysis", "Algorithms", "TensorFlow / PyTorch"]
+  },
+  "Data Scientist": {
+    steps: [
+      "Study statistics and probability",
+      "Use Python for data analysis",
+      "Build predictive models",
+      "Visualize insights clearly",
+      "Share analysis in portfolios"
+    ],
+    skills: ["Python", "Statistics", "SQL", "Machine Learning", "Data Visualization"]
+  },
+  "Software Engineer": {
+    steps: [
+      "Master a programming language",
+      "Build applications end-to-end",
+      "Learn data structures and algorithms",
+      "Use Git and team workflows",
+      "Apply for internships and entry roles"
+    ],
+    skills: ["JavaScript / Java / Python", "Problem Solving", "Web Development", "Version Control", "APIs"]
+  },
+  "Chartered Accountant": {
+    steps: [
+      "Complete accounting education",
+      "Train with a CA firm",
+      "Study taxation and auditing",
+      "Pass CA exams",
+      "Gain experience in finance roles"
+    ],
+    skills: ["Accounting", "Taxation", "Auditing", "Ethics", "Financial Reporting"]
+  },
+  "Civil Engineer": {
+    steps: [
+      "Study civil engineering basics",
+      "Practice design and drawing",
+      "Learn construction planning",
+      "Take internships on site",
+      "Prepare for engineering recruitment"
+    ],
+    skills: ["Maths", "Planning", "Drawing", "Project Management", "Structural Analysis"]
+  },
+  "Cybersecurity Analyst": {
+    steps: [
+      "Learn network and security basics",
+      "Practice ethical hacking",
+      "Earn security certifications",
+      "Work on security assessments",
+      "Build a security portfolio"
+    ],
+    skills: ["Networking", "Security Tools", "Threat Analysis", "Ethical Hacking", "Incident Response"]
+  },
+  "Cloud Engineer": {
+    steps: [
+      "Understand cloud fundamentals",
+      "Learn AWS/Azure/GCP services",
+      "Build cloud projects",
+      "Use automation and IaC tools",
+      "Prepare for cloud certifications"
+    ],
+    skills: ["Cloud Platforms", "Scripting", "DevOps", "Containers", "Security"]
+  },
+  "UI/UX Designer": {
+    steps: [
+      "Learn design principles",
+      "Build user interfaces",
+      "Create prototypes",
+      "Validate with user testing",
+      "Build a design portfolio"
+    ],
+    skills: ["Figma", "User Research", "Interaction Design", "Visual Design", "Prototyping"]
+  },
+  "Graphic Designer": {
+    steps: [
+      "Learn visual design tools",
+      "Practice branding and layouts",
+      "Build a portfolio",
+      "Work on client projects",
+      "Showcase your designs online"
+    ],
+    skills: ["Illustrator", "Photoshop", "Typography", "Branding", "Visual Storytelling"]
+  },
+  "Nurse / Healthcare": {
+    steps: [
+      "Complete nursing education",
+      "Gain clinical practice",
+      "Learn patient care standards",
+      "Work in hospital teams",
+      "Prepare for healthcare certifications"
+    ],
+    skills: ["Patient Care", "Medical Knowledge", "Teamwork", "Compassion", "First Aid"]
+  }
+};
+
+// ──────────────── INIT ────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  const raw = localStorage.getItem('careerData');
+  if (!raw) {
+    document.getElementById('resultHeadline').textContent = '⚠️ No quiz data found';
+    document.getElementById('resultSub').textContent = 'Please complete the career assessment quiz first.';
+    document.getElementById('careerGrid').innerHTML = `<a href="quiz.html" class="btn btn-primary btn-lg" style="grid-column:1/-1">Take the Quiz →</a>`;
+    return;
+  }
+
+  const ud = JSON.parse(raw);
+
+  // Match careers
+  let matched = careerDB.filter(c =>
+    c.field === ud.interest ||
+    c.subject.includes(ud.subject) ||
+    (ud.govt === 'yes' && c.field === 'govt')
+  );
+
+  // Deduplicate and pad
+  matched = [...new Map(matched.map(c => [c.name, c])).values()];
+  if (matched.length < 6) {
+    careerDB.forEach(c => {
+      if (!matched.find(m => m.name === c.name) && matched.length < 8) matched.push(c);
+    });
+  }
+
+  // Render headline
+  const fieldLabel = {
+    tech:"Technology & Engineering", creative:"Design & Creative Arts",
+    business:"Business & Finance", practical:"Practical & Technical Trades",
+    social:"Social & Healthcare", govt:"Government & Public Service"
+  }[ud.interest] || "Your Field";
+  document.getElementById('resultHeadline').textContent = `Great fit for ${fieldLabel}!`;
+
+  // ── Careers Tab ──
+  const careerGrid = document.getElementById('careerGrid');
+  careerGrid.innerHTML = '';
+  matched.slice(0, 9).forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'career-card';
+    el.innerHTML = `
+      <h4>${c.name}</h4>
+      <p class="salary-tag">💰 ${c.salary}</p>
+      ${c.tags.map(t => `<span class="field-tag">${t}</span>`).join(' ')}
+      <div class="action-row" style="margin-top: 18px; gap: 10px; display: flex; flex-wrap: wrap;">
+        <button class="btn btn-outline btn-sm" type="button" data-action="trend" data-role="${c.name}">Salary trend</button>
+        <button class="btn btn-green btn-sm" type="button" data-action="roadmap" data-role="${c.name}">View roadmap</button>
+      </div>
+    `;
+    careerGrid.appendChild(el);
+  });
+
+  careerGrid.addEventListener('click', function(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const role = button.dataset.role;
+    const action = button.dataset.action;
+    if (action === 'trend') renderGraph(role);
+    if (action === 'roadmap') renderRoadmap(role);
+  });
+
+  document.getElementById('roleModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeModal();
+    }
+  });
+
+  // ── Courses Tab ──
+  const courseGrid = document.getElementById('courseGrid');
+  courseGrid.innerHTML = '';
+  const courseField = ud.interest in courseDB ? ud.interest : 'tech';
+  const subField    = ud.subject in courseDB ? ud.subject : null;
+  let courses = courseDB[courseField] || [];
+  if (subField && courseDB[subField]) {
+    const extra = courseDB[subField].filter(x => !courses.find(c => c.name === x.name));
+    courses = [...courses, ...extra].slice(0, 6);
+  }
+  courses.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'course-card';
+    el.innerHTML = `
+      <div class="course-icon">${c.icon}</div>
+      <h4>${c.name}</h4>
+      <p>${c.desc}</p>
+      <div class="duration">⏱ Duration: ${c.duration}</div>
+    `;
+    courseGrid.appendChild(el);
+  });
+
+  // ── Analytics Tab ──
+  buildBarChart('salaryChart', salaryData.map(d => ({
+    label: d.label, pct: Math.round((d.max / 30) * 100),
+    value: `₹${d.min}–${d.max} LPA`
+  })));
+  buildBarChart('growthChart', growthData.map(d => ({
+    label: d.label, pct: d.pct, value: `+${d.pct}%`
+  })));
+  buildBarChart('demandChart', demandData.map(d => ({
+    label: d.label, pct: Math.round((d.score / 10) * 100), value: `${d.score}/10`
+  })));
+
+  // Animate bars after short delay
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => {
+      el.style.width = el.dataset.target;
+    });
+  }, 300);
+});
+
+function buildBarChart(containerId, rows) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="bar-label">
+        <span>${r.label}</span>
+        <span>${r.value}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" data-target="${r.pct}%" style="width:0%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function buildSalaryGraph(role) {
+  const trend = salaryTrend[role] || [];
+  if (!trend.length) {
+    return '<div class="empty-state">Salary trend data is not yet available for this career.</div>';
+  }
+
+  const values = trend.map(point => point.value);
+  const years = trend.map(point => point.year);
+  const maxValue = Math.max(...values) * 1.1;
+  const minValue = Math.min(...values) * 0.9;
+  const width = 520;
+  const height = 260;
+  const padding = 42;
+  const stepX = (width - padding * 2) / (years.length - 1);
+  const scaleY = (height - padding * 2) / (maxValue - minValue || 1);
+
+  const path = trend.map((point, index) => {
+    const x = padding + index * stepX;
+    const y = height - padding - (point.value - minValue) * scaleY;
+    return `${index === 0 ? 'M' : 'L'}${x},${y}`;
+  }).join(' ');
+
+  const points = trend.map((point, index) => {
+    const x = padding + index * stepX;
+    const y = height - padding - (point.value - minValue) * scaleY;
+    return `<circle cx="${x}" cy="${y}" r="4" fill="var(--accent-blue)" />`;
+  }).join('');
+
+  const yearLabels = years.map((year, index) => {
+    const x = padding + index * stepX;
+    return `<text x="${x}" y="${height - 12}" text-anchor="middle" fill="var(--text-secondary)" font-size="0.78rem">${year}</text>`;
+  }).join('');
+
+  const valueLabels = [maxValue, (maxValue + minValue) / 2, minValue].map((val, i) => {
+    const y = padding + i * ((height - padding * 2) / 2);
+    return `<text x="10" y="${y + 5}" fill="var(--text-secondary)" font-size="0.78rem">${Math.round(val)}L</text>`;
+  }).join('');
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Salary trend for ${role}">
+      <defs>
+        <linearGradient id="trendGradient" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stop-color="var(--accent-blue)" />
+          <stop offset="100%" stop-color="var(--accent-purple)" />
+        </linearGradient>
+      </defs>
+      <g>
+        <path d="M${padding},${padding} L${padding},${height - padding}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <path d="M${padding},${height - padding} L${width - padding},${height - padding}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <path d="${path}" fill="none" stroke="url(#trendGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        ${points}
+        ${yearLabels}
+        ${valueLabels}
+      </g>
+    </svg>`;
+}
+
+function showModal(role, htmlContent, subtitle) {
+  document.getElementById('modalTitle').textContent = role;
+  document.getElementById('modalSubtitle').textContent = subtitle;
+  document.getElementById('modalBody').innerHTML = htmlContent;
+  document.getElementById('roleModal').hidden = false;
+}
+
+function closeModal() {
+  document.getElementById('roleModal').hidden = true;
+  document.getElementById('modalBody').innerHTML = '';
+}
+
+function renderGraph(role) {
+  const graphHtml = buildSalaryGraph(role);
+  showModal(role, `
+    <p class="modal-intro">This trend shows salary growth over the past 5 years for ${role}.</p>
+    <div class="salary-graph">${graphHtml}</div>
+    <div class="action-row">
+      <button class="btn btn-primary" type="button" onclick="renderRoadmap('${role}')">View Roadmap</button>
+    </div>
+  `, 'Salary growth trend');
+}
+
+function renderRoadmap(role) {
+  const roadmap = careerRoadmaps[role];
+  if (!roadmap) {
+    showModal(role, '<div class="empty-state">Roadmap details are not available for this career yet.</div>', 'Roadmap');
+    return;
+  }
+
+  const stepsHtml = roadmap.steps.map(step => `<li class="roadmap-step"><strong>Step:</strong> ${step}</li>`).join('');
+  const skillsHtml = roadmap.skills.map(skill => `<li class="roadmap-step">${skill}</li>`).join('');
+
+  showModal(role, `
+    <p class="modal-intro">The roadmap below explains the skill and step sequence to reach ${role}.</p>
+    <div class="roadmap-section">
+      <h4>Roadmap steps</h4>
+      <ul class="roadmap-list">${stepsHtml}</ul>
+      <h4 style="margin-top: 18px;">Key skills</h4>
+      <ul class="roadmap-list">${skillsHtml}</ul>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-outline" type="button" onclick="renderGraph('${role}')">Back to salary trend</button>
+    </div>
+  `, 'Role roadmap');
+}
+
+// ──────────────── TABS ────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+
+  // Re-animate bars when analytics tab opened
+  if (id === 'analytics') {
+    setTimeout(() => {
+      document.querySelectorAll('.bar-fill').forEach(el => {
+        el.style.width = el.dataset.target;
+      });
+    }, 100);
+  }
+}
+</script>
+
+</body>
+</html>

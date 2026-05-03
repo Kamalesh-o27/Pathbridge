@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Dreamer – PathBridge</title>
+  <meta name="description" content="Career Dreamer by PathBridge helps you search and explore career paths with a Google-style experience." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">PathBridge</a>
+  <div class="navbar-links">
+    <a href="index.html">← Home</a>
+    <a href="quiz.html">Quiz</a>
+  </div>
+</nav>
+
+<div class="page-wrap" style="padding-top: 100px; gap: 24px;">
+  <div class="card card-wide" style="animation-delay:0.05s;">
+    <div class="dreamer-hero">
+      <div class="dreamer-copy">
+        <span class="section-badge">🧭 Career Dreamer</span>
+        <h1 class="page-title">Dream. Search. Discover your next career.</h1>
+        <p class="subtitle">Explore 30+ career paths with downloadable roadmaps, salary trends, and curated learning resources.</p>
+
+        <div class="search-box">
+          <input id="careerSearch" class="search-input" type="search" placeholder="Search for roles like 'Frontend', 'DevOps', 'Data Engineer'..." />
+        </div>
+
+        <div class="chip-wrap" id="hintChips">
+          <button class="chip">AI</button>
+          <button class="chip">Design</button>
+          <button class="chip">Government</button>
+          <button class="chip">Entrepreneur</button>
+          <button class="chip">Healthcare</button>
+          <button class="chip">Software</button>
+        </div>
+
+        <div class="tag-list" id="categoryTags">
+          <button class="tag active" data-filter="all">All</button>
+          <button class="tag" data-filter="tech">Technology</button>
+          <button class="tag" data-filter="creative">Creative</button>
+          <button class="tag" data-filter="business">Business</button>
+          <button class="tag" data-filter="practical">Trades</button>
+          <button class="tag" data-filter="social">Social</button>
+          <button class="tag" data-filter="govt">Government</button>
+        </div>
+        <div class="analytics-tip">Click any career card to see salary trends and download roadmaps.</div>
+      </div>
+
+      <div class="dreamer-snapshot">
+        <div class="dreamer-metric">
+          <div class="metric-card">
+            <div class="metric-number">30+</div>
+            <div class="metric-label">Career paths</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-number">15</div>
+            <div class="metric-label">Tech roles</div>
+          </div>
+        </div>
+        <div class="metric-card" style="grid-column: 1 / -1; padding: 24px;">
+          <h3 style="margin:0 0 12px;">Career discovery made simple</h3>
+          <p style="color: var(--text-secondary); line-height:1.7;">Type a keyword, choose a category, and preview the best career paths for your interests. Every card includes salary trends and downloadable roadmaps.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dreamer-results">
+      <div class="roadmap-grid" id="careerGrid"></div>
+    </div>
+
+    <div class="modal-overlay" id="roleModal" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 id="modalTitle">Career insight</h3>
+            <p id="modalSubtitle">Salary trend and roadmap details.</p>
+          </div>
+          <button class="modal-close" type="button" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-sm" style="animation-delay:0.1s;">
+    <div class="career-detail">
+      <h3>Ready for a personalized plan?</h3>
+      <p>Career Dreamer helps you explore quickly. For tailored guidance on courses, colleges, and next steps, take the PathBridge career quiz.</p>
+      <div class="gap-12" style="justify-content: center; margin-top: 24px;">
+        <a href="quiz.html" class="btn btn-primary btn-sm">Take the Career Quiz</a>
+        <a href="ug.html" class="btn btn-outline btn-sm">UG Guidance</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const careerPaths = [
+    { title: 'Frontend Developer', category: 'tech', desc: 'Build interactive user interfaces and web experiences using modern JavaScript frameworks.', skills: 'JavaScript, React, CSS', salary: '₹6–16 LPA' },
+    { title: 'Backend Developer', category: 'tech', desc: 'Create server-side logic, APIs, and database architectures.', skills: 'Node.js, APIs, Databases', salary: '₹8–18 LPA' },
+    { title: 'Full Stack Developer', category: 'tech', desc: 'Develop complete web applications from frontend to backend.', skills: 'JavaScript, React, Node.js', salary: '₹10–22 LPA' },
+    { title: 'DevOps Engineer', category: 'tech', desc: 'Manage infrastructure, deployment pipelines, and system reliability.', skills: 'Docker, Kubernetes, CI/CD', salary: '₹10–20 LPA' },
+    { title: 'Cloud Engineer', category: 'tech', desc: 'Design and manage cloud infrastructure on AWS, Azure, or GCP.', skills: 'AWS, Azure, Cloud Architecture', salary: '₹12–24 LPA' },
+    { title: 'AI / ML Engineer', category: 'tech', desc: 'Build intelligent systems, machine learning models, and AI products.', skills: 'Python, Data, Algorithms', salary: '₹10–25 LPA' },
+    { title: 'Data Scientist', category: 'tech', desc: 'Analyze data to answer business questions and predict trends.', skills: 'Statistics, Python, ML', salary: '₹8–20 LPA' },
+    { title: 'Data Engineer', category: 'tech', desc: 'Build and maintain data pipelines and data infrastructure.', skills: 'SQL, ETL, Big Data', salary: '₹10–22 LPA' },
+    { title: 'Cybersecurity Engineer', category: 'tech', desc: 'Protect systems and networks from security threats.', skills: 'Security, Cryptography, Testing', salary: '₹8–18 LPA' },
+    { title: 'Mobile Developer (Android)', category: 'tech', desc: 'Develop native Android applications for mobile devices.', skills: 'Java, Kotlin, Android SDK', salary: '₹7–17 LPA' },
+    { title: 'Mobile Developer (iOS)', category: 'tech', desc: 'Develop native iOS applications for Apple devices.', skills: 'Swift, Objective-C, iOS SDK', salary: '₹8–18 LPA' },
+    { title: 'Blockchain Developer', category: 'tech', desc: 'Build decentralized applications and smart contracts.', skills: 'Solidity, Web3, Cryptography', salary: '₹12–28 LPA' },
+    { title: 'Game Developer', category: 'tech', desc: 'Create games using game engines like Unity or Unreal.', skills: 'Unity, C#, Graphics', salary: '₹8–18 LPA' },
+    { title: 'QA Engineer / Tester', category: 'tech', desc: 'Test software for bugs, quality, and performance.', skills: 'Testing, Automation, QA', salary: '₹5–12 LPA' },
+    { title: 'Software Architect', category: 'tech', desc: 'Design large-scale software systems and architectures.', skills: 'System Design, Architecture', salary: '₹16–35 LPA' },
+    { title: 'DevSecOps Engineer', category: 'tech', desc: 'Integrate security into continuous delivery with security practices.', skills: 'Security, DevOps, Cloud', salary: '₹12–25 LPA' },
+    { title: 'MLOps Engineer', category: 'tech', desc: 'Deploy and maintain machine learning systems in production.', skills: 'ML, DevOps, Kubernetes', salary: '₹12–26 LPA' },
+    { title: 'Technical Writer', category: 'tech', desc: 'Document systems, APIs, and products for technical audiences.', skills: 'Writing, Research, Clarity', salary: '₹6–15 LPA' },
+    { title: 'Product Manager', category: 'business', desc: 'Lead product strategy and roadmap for applications.', skills: 'Strategy, Analytics, Communication', salary: '₹12–25 LPA' },
+    { title: 'Engineering Manager', category: 'business', desc: 'Lead engineering execution and team growth.', skills: 'Leadership, Agile, Planning', salary: '₹20–45 LPA' },
+    { title: 'Developer Relations', category: 'business', desc: 'Build developer communities and product adoption.', skills: 'Communication, Content, Coding', salary: '₹10–25 LPA' },
+    { title: 'UX / UI Designer', category: 'creative', desc: 'Design user-friendly digital experiences and interfaces.', skills: 'Design, User Research, Prototyping', salary: '₹5–12 LPA' },
+    { title: 'Graphic Designer', category: 'creative', desc: 'Create visual communications for brands, media, and campaigns.', skills: 'Illustration, Branding, Tools', salary: '₹3–8 LPA' },
+    { title: 'Digital Marketer', category: 'business', desc: 'Grow brands online with marketing, social media, and analytics.', skills: 'SEO, Ads, Analytics', salary: '₹4–10 LPA' },
+    { title: 'Data Analyst', category: 'business', desc: 'Turn business data into actionable insights.', skills: 'SQL, Excel, Tableau', salary: '₹6–14 LPA' },
+    { title: 'Business Analyst', category: 'business', desc: 'Translate business needs into technical solutions and strategy.', skills: 'Analysis, Communication, Excel', salary: '₹6–15 LPA' },
+    { title: 'Chartered Accountant', category: 'business', desc: 'Manage finance, auditing, and taxation for organizations.', skills: 'Accounting, Finance, Ethics', salary: '₹8–20 LPA' },
+    { title: 'Civil Engineer', category: 'practical', desc: 'Design and supervise construction and infrastructure projects.', skills: 'Maths, Planning, CAD', salary: '₹4–10 LPA' },
+    { title: 'Electrician / Technician', category: 'practical', desc: 'Work hands-on with electrical systems and industrial equipment.', skills: 'Technical Skills, Safety, Repair', salary: '₹3–8 LPA' },
+    { title: 'Teacher / Educator', category: 'social', desc: 'Teach and shape future generations in schools or communities.', skills: 'Communication, Lesson Planning, Empathy', salary: '₹3–8 LPA' },
+    { title: 'Nurse / Healthcare Professional', category: 'social', desc: 'Care for patients and support medical teams in hospitals.', skills: 'Compassion, Medical Knowledge, Teamwork', salary: '₹4–9 LPA' },
+    { title: 'UPSC / Civil Services', category: 'govt', desc: 'Prepare for India’s top government officer roles and public leadership.', skills: 'General Studies, Ethics, Essay Writing', salary: '₹8–15 LPA+' },
+    { title: 'Bank PO / Govt Officer', category: 'govt', desc: 'Work in government banking and administration roles.', skills: 'Reasoning, Quant, Discipline', salary: '₹4–9 LPA' }
+  ];
+
+  const salaryTrend = {
+    'AI / ML Engineer': [
+      { year: 2019, value: 8 },
+      { year: 2020, value: 9.5 },
+      { year: 2021, value: 12 },
+      { year: 2022, value: 16 },
+      { year: 2023, value: 20 }
+    ],
+    'Software Developer': [
+      { year: 2019, value: 5 },
+      { year: 2020, value: 6 },
+      { year: 2021, value: 8 },
+      { year: 2022, value: 11 },
+      { year: 2023, value: 14 }
+    ],
+    'Data Scientist': [
+      { year: 2019, value: 7 },
+      { year: 2020, value: 8.5 },
+      { year: 2021, value: 10 },
+      { year: 2022, value: 13 },
+      { year: 2023, value: 17 }
+    ],
+    'Frontend Developer': [
+      { year: 2019, value: 4 },
+      { year: 2020, value: 5.5 },
+      { year: 2021, value: 8 },
+      { year: 2022, value: 11 },
+      { year: 2023, value: 14 }
+    ],
+    'Backend Developer': [
+      { year: 2019, value: 5 },
+      { year: 2020, value: 6.5 },
+      { year: 2021, value: 9 },
+      { year: 2022, value: 13 },
+      { year: 2023, value: 16 }
+    ],
+    'Full Stack Developer': [
+      { year: 2019, value: 6 },
+      { year: 2020, value: 8 },
+      { year: 2021, value: 11 },
+      { year: 2022, value: 15 },
+      { year: 2023, value: 18 }
+    ],
+    'DevOps Engineer': [
+      { year: 2019, value: 7 },
+      { year: 2020, value: 9 },
+      { year: 2021, value: 12 },
+      { year: 2022, value: 15 },
+      { year: 2023, value: 18 }
+    ],
+    'Cloud Engineer': [
+      { year: 2019, value: 8 },
+      { year: 2020, value: 10 },
+      { year: 2021, value: 14 },
+      { year: 2022, value: 18 },
+      { year: 2023, value: 22 }
+    ],
+    'Data Engineer': [
+      { year: 2019, value: 6 },
+      { year: 2020, value: 8 },
+      { year: 2021, value: 11 },
+      { year: 2022, value: 14 },
+      { year: 2023, value: 18 }
+    ],
+    'Mobile Developer (Android)': [
+      { year: 2019, value: 5 },
+      { year: 2020, value: 6.5 },
+      { year: 2021, value: 8.5 },
+      { year: 2022, value: 11 },
+      { year: 2023, value: 14 }
+    ],
+    'Blockchain Developer': [
+      { year: 2019, value: 10 },
+      { year: 2020, value: 12 },
+      { year: 2021, value: 15 },
+      { year: 2022, value: 20 },
+      { year: 2023, value: 24 }
+    ],
+    'Product Manager': [
+      { year: 2019, value: 10 },
+      { year: 2020, value: 12 },
+      { year: 2021, value: 15 },
+      { year: 2022, value: 19 },
+      { year: 2023, value: 22 }
+    ],
+    'Graphic Designer': [
+      { year: 2019, value: 2.5 },
+      { year: 2020, value: 3 },
+      { year: 2021, value: 4 },
+      { year: 2022, value: 5.5 },
+      { year: 2023, value: 7 }
+    ],
+    'Digital Marketer': [
+      { year: 2019, value: 3 },
+      { year: 2020, value: 4 },
+      { year: 2021, value: 5.5 },
+      { year: 2022, value: 7 },
+      { year: 2023, value: 9 }
+    ],
+    'Business Analyst': [
+      { year: 2019, value: 5 },
+      { year: 2020, value: 6 },
+      { year: 2021, value: 7.5 },
+      { year: 2022, value: 10 },
+      { year: 2023, value: 13 }
+    ],
+    'Chartered Accountant': [
+      { year: 2019, value: 6 },
+      { year: 2020, value: 7 },
+      { year: 2021, value: 9 },
+      { year: 2022, value: 12 },
+      { year: 2023, value: 15 }
+    ],
+    'Civil Engineer': [
+      { year: 2019, value: 3.5 },
+      { year: 2020, value: 4 },
+      { year: 2021, value: 5 },
+      { year: 2022, value: 6 },
+      { year: 2023, value: 8 }
+    ],
+    'Electrician / Technician': [
+      { year: 2019, value: 2.5 },
+      { year: 2020, value: 3 },
+      { year: 2021, value: 3.5 },
+      { year: 2022, value: 4.5 },
+      { year: 2023, value: 5.5 }
+    ],
+    'Teacher / Educator': [
+      { year: 2019, value: 2.5 },
+      { year: 2020, value: 2.8 },
+      { year: 2021, value: 3.2 },
+      { year: 2022, value: 3.8 },
+      { year: 2023, value: 4.5 }
+    ],
+    'Nurse / Healthcare Professional': [
+      { year: 2019, value: 3 },
+      { year: 2020, value: 3.5 },
+      { year: 2021, value: 4 },
+      { year: 2022, value: 5 },
+      { year: 2023, value: 6.5 }
+    ],
+    'UPSC / Civil Services': [
+      { year: 2019, value: 6 },
+      { year: 2020, value: 6.5 },
+      { year: 2021, value: 7 },
+      { year: 2022, value: 8 },
+      { year: 2023, value: 9 }
+    ],
+    'Bank PO / Govt Officer': [
+      { year: 2019, value: 3.5 },
+      { year: 2020, value: 4 },
+      { year: 2021, value: 4.5 },
+      { year: 2022, value: 5.5 },
+      { year: 2023, value: 6.5 }
+    ]
+  };
+
+  const careerRoadmaps = {
+    'AI / ML Engineer': {
+      steps: [
+        'Learn Python and statistics',
+        'Build machine learning projects',
+        'Practice model deployment',
+        'Contribute to open source or internships',
+        'Prepare for role-specific interviews'
+      ],
+      skills: ['Python', 'Machine Learning', 'Data Analysis', 'Algorithms', 'TensorFlow / PyTorch']
+    },
+    'Software Developer': {
+      steps: [
+        'Master one programming language',
+        'Build full-stack projects',
+        'Learn data structures and algorithms',
+        'Use version control and collaborate',
+        'Apply to internships and entry-level roles'
+      ],
+      skills: ['JavaScript / Java / Python', 'Web development', 'Problem solving', 'Git', 'APIs']
+    },
+    'Data Scientist': {
+      steps: [
+        'Study statistics and probability',
+        'Build data analysis projects',
+        'Learn machine learning pipelines',
+        'Use visualization tools',
+        'Share findings in reports or portfolios'
+      ],
+      skills: ['Python', 'Statistics', 'SQL', 'Machine Learning', 'Data Visualization']
+    },
+    'UX / UI Designer': {
+      steps: [
+        'Learn design fundamentals',
+        'Practice interface design',
+        'Build clickable prototypes',
+        'Collect feedback and iterate',
+        'Create a portfolio of work'
+      ],
+      skills: ['Figma / Sketch', 'User research', 'Visual design', 'Prototyping', 'Interaction design']
+    },
+    'Graphic Designer': {
+      steps: [
+        'Learn design tools',
+        'Study typography and layout',
+        'Work on branding projects',
+        'Publish a design portfolio',
+        'Explore freelance or agency work'
+      ],
+      skills: ['Illustrator', 'Photoshop', 'Branding', 'Typography', 'Visual storytelling']
+    },
+    'Digital Marketer': {
+      steps: [
+        'Learn digital marketing channels',
+        'Run small ad campaigns',
+        'Practice SEO and content strategy',
+        'Analyze campaign results',
+        'Prepare case studies for employers'
+      ],
+      skills: ['SEO', 'Social media', 'Analytics', 'Ads', 'Content strategy']
+    },
+    'Business Analyst': {
+      steps: [
+        'Understand business processes',
+        'Learn data analysis tools',
+        'Practice creating reports',
+        'Work on case studies',
+        'Interview with structured problem solving'
+      ],
+      skills: ['Excel', 'Communication', 'Requirements gathering', 'Data visualization', 'Business strategy']
+    },
+    'Chartered Accountant': {
+      steps: [
+        'Complete accounting education',
+        'Gain training with a CA firm',
+        'Study taxation and auditing',
+        'Pass CA exams',
+        'Build practice or corporate experience'
+      ],
+      skills: ['Accounting', 'Taxation', 'Auditing', 'Ethics', 'Financial reporting']
+    },
+    'Civil Engineer': {
+      steps: [
+        'Study engineering fundamentals',
+        'Practice structural design',
+        'Learn CAD and planning tools',
+        'Join internships or site work',
+        'Prepare for engineer recruitment'
+      ],
+      skills: ['Maths', 'Drawing', 'Planning', 'Structural analysis', 'Project management']
+    },
+    'Electrician / Technician': {
+      steps: [
+        'Learn electrical theory',
+        'Practice wiring and maintenance',
+        'Study safety standards',
+        'Complete hands-on training',
+        'Work on real installations'
+      ],
+      skills: ['Electrical safety', 'Troubleshooting', 'Repair', 'Installation', 'Technical drawing']
+    },
+    'Teacher / Educator': {
+      steps: [
+        'Choose a subject area',
+        'Gain teaching practice',
+        'Learn lesson planning',
+        'Understand classroom management',
+        'Build a teaching portfolio'
+      ],
+      skills: ['Communication', 'Patience', 'Curriculum planning', 'Classroom management', 'Assessment']
+    },
+    'Nurse / Healthcare Professional': {
+      steps: [
+        'Complete nursing education',
+        'Practice clinical skills',
+        'Gain patient care experience',
+        'Learn emergency protocols',
+        'Join a hospital or clinic role'
+      ],
+      skills: ['Compassion', 'Medical knowledge', 'Teamwork', 'Patient care', 'First aid']
+    },
+    'UPSC / Civil Services': {
+      steps: [
+        'Study current affairs deeply',
+        'Read core GS subjects',
+        'Practice answer writing',
+        'Take mock interviews',
+        'Prepare for the whole selection process'
+      ],
+      skills: ['General studies', 'Writing', 'Ethics', 'Analytical thinking', 'Interview skills']
+    },
+    'Frontend Developer': {
+      steps: [
+        'Learn HTML, CSS, and JavaScript fundamentals',
+        'Master React or Vue.js framework',
+        'Build responsive web projects',
+        'Practice with real-world design mockups',
+        'Apply to frontend-focused positions'
+      ],
+      skills: ['HTML/CSS', 'JavaScript', 'React', 'API Integration', 'Responsive Design']
+    },
+    'Backend Developer': {
+      steps: [
+        'Choose a backend language (Node.js, Python, Java)',
+        'Learn database design and SQL',
+        'Build RESTful APIs',
+        'Understand authentication and security',
+        'Apply to backend development roles'
+      ],
+      skills: ['Node.js / Python / Java', 'Databases', 'APIs', 'Security', 'Microservices']
+    },
+    'DevOps Engineer': {
+      steps: [
+        'Learn Linux and command-line tools',
+        'Master Docker and containerization',
+        'Study Kubernetes orchestration',
+        'Build CI/CD pipelines',
+        'Practice infrastructure automation'
+      ],
+      skills: ['Linux', 'Docker', 'Kubernetes', 'Jenkins', 'Cloud Platforms']
+    },
+    'Product Manager': {
+      steps: [
+        'Understand product management fundamentals',
+        'Learn user research and data analysis',
+        'Build product roadmaps and strategy',
+        'Practice stakeholder communication',
+        'Lead cross-functional product teams'
+      ],
+      skills: ['Product Strategy', 'User Research', 'Analytics', 'Leadership', 'Communication']
+    },
+    'Data Analyst': {
+      steps: [
+        'Master SQL and data querying',
+        'Learn data visualization tools',
+        'Study statistics and probability',
+        'Build analytical dashboards',
+        'Practice business problem solving'
+      ],
+      skills: ['SQL', 'Excel', 'Tableau/Power BI', 'Statistics', 'Python']
+    },
+    'Bank PO / Govt Officer': {
+      steps: [
+        'Prepare reasoning and quant',
+        'Practice mock tests',
+        'Study banking awareness',
+        'Improve time management',
+        'Build confidence for interviews'
+      ],
+      skills: ['Quantitative ability', 'Reasoning', 'General awareness', 'English', 'Discipline']
+    }
+  };
+
+  const roadmapMappings = {
+    'Frontend Developer': 'https://roadmap.sh/frontend',
+    'Backend Developer': 'https://roadmap.sh/backend',
+    'Full Stack Developer': 'https://roadmap.sh/full-stack',
+    'DevOps Engineer': 'https://roadmap.sh/devops',
+    'Cloud Engineer': 'https://roadmap.sh/cloud',
+    'AI / ML Engineer': 'https://roadmap.sh/machine-learning',
+    'Data Scientist': 'https://roadmap.sh/data-science',
+    'Data Engineer': 'https://roadmap.sh/data-engineer',
+    'Cybersecurity Engineer': 'https://roadmap.sh/cyber-security',
+    'Mobile Developer (Android)': 'https://roadmap.sh/android',
+    'Mobile Developer (iOS)': 'https://roadmap.sh/ios',
+    'Blockchain Developer': 'https://roadmap.sh/blockchain',
+    'QA Engineer / Tester': 'https://roadmap.sh/qa',
+    'MLOps Engineer': 'https://roadmap.sh/mlops',
+    'DevSecOps Engineer': 'https://roadmap.sh/security',
+    'Software Architect': 'https://roadmap.sh/software-architecture'
+  };
+
+  const careerGrid = document.getElementById('careerGrid');
+  const searchInput = document.getElementById('careerSearch');
+  const categoryTags = document.querySelectorAll('.tag');
+  const hintChips = document.querySelectorAll('.chip');
+  const roleModal = document.getElementById('roleModal');
+  let selectedCategory = 'all';
+
+  function buildSalaryGraph(role) {
+    const trend = salaryTrend[role] || [];
+    if (!trend.length) {
+      return '<div class="empty-state">Salary trend data is not available for this role yet.</div>';
+    }
+
+    const values = trend.map(point => point.value);
+    const years = trend.map(point => point.year);
+    const maxValue = Math.max(...values) * 1.1;
+    const minValue = Math.min(...values) * 0.9;
+    const width = 520;
+    const height = 260;
+    const padding = 42;
+    const stepX = (width - padding * 2) / (years.length - 1);
+    const scaleY = (height - padding * 2) / (maxValue - minValue || 1);
+
+    const path = trend.map((point, index) => {
+      const x = padding + index * stepX;
+      const y = height - padding - (point.value - minValue) * scaleY;
+      return `${index === 0 ? 'M' : 'L'}${x},${y}`;
+    }).join(' ');
+
+    const points = trend.map((point, index) => {
+      const x = padding + index * stepX;
+      const y = height - padding - (point.value - minValue) * scaleY;
+      return `<circle cx="${x}" cy="${y}" r="4" fill="var(--accent-blue)" />`;
+    }).join('');
+
+    const yearLabels = years.map((year, index) => {
+      const x = padding + index * stepX;
+      return `<text x="${x}" y="${height - 12}" text-anchor="middle" fill="var(--text-secondary)" font-size="0.78rem">${year}</text>`;
+    }).join('');
+
+    const valueLabels = [maxValue, (maxValue + minValue) / 2, minValue].map((val, i) => {
+      const y = padding + i * ((height - padding * 2) / 2);
+      return `<text x="10" y="${y + 5}" fill="var(--text-secondary)" font-size="0.78rem">${Math.round(val)}L</text>`;
+    }).join('');
+
+    return `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Salary trend for ${role}">
+        <defs>
+          <linearGradient id="trendGradient" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="var(--accent-blue)" />
+            <stop offset="100%" stop-color="var(--accent-purple)" />
+          </linearGradient>
+        </defs>
+        <g>
+          <path d="M${padding},${padding} L${padding},${height - padding}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+          <path d="M${padding},${height - padding} L${width - padding},${height - padding}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+          <path d="${path}" fill="none" stroke="url(#trendGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          ${points}
+          ${yearLabels}
+          ${valueLabels}
+        </g>
+      </svg>`;
+  }
+
+  function showModal(role, htmlContent, subtitle) {
+    document.getElementById('modalTitle').textContent = role;
+    document.getElementById('modalSubtitle').textContent = subtitle;
+    document.getElementById('modalBody').innerHTML = htmlContent;
+    roleModal.hidden = false;
+  }
+
+  function closeModal() {
+    roleModal.hidden = true;
+    document.getElementById('modalBody').innerHTML = '';
+  }
+
+  function renderGraph(role) {
+    const graphHtml = buildSalaryGraph(role);
+    showModal(role, `
+      <p class="modal-intro">This graph shows how salary expectations have increased for ${role} over the last five years.</p>
+      <div class="salary-graph">${graphHtml}</div>
+      <div class="action-row">
+        <button class="btn btn-primary" type="button" onclick="renderRoadmap('${role}')">View roadmap</button>
+      </div>
+    `, 'Salary trend and outlook');
+  }
+
+  function renderRoadmap(role) {
+    const roadmap = careerRoadmaps[role] || { steps: ['Master fundamentals', 'Build projects', 'Learn best practices'], skills: ['Core concepts', 'Tools', 'Problem solving'] };
+    const officialUrl = roadmapMappings[role];
+
+    const stepsHtml = roadmap.steps.map(step => `<li class="roadmap-step"><strong>Step:</strong> ${step}</li>`).join('');
+    const skillsHtml = roadmap.skills.map(skill => `<li class="roadmap-step">${skill}</li>`).join('');
+    const officialButton = officialUrl ? `<a class="btn btn-outline" href="${officialUrl}" target="_blank" rel="noopener">Open roadmap.sh</a>` : '';
+
+    let actionButtons = `
+      <button class="btn btn-outline" type="button" onclick="renderGraph('${role}')">Back to salary trend</button>
+      ${officialButton}
+      <button class="btn btn-green" type="button" onclick="downloadRoadmapPDF('${role}')">📥 Download PDF</button>`;
+
+    showModal(role, `
+      <p class="modal-intro">Here is a practical pathway and the key skills needed to move into ${role}.</p>
+      <div class="roadmap-section">
+        <h4>Step-by-step roadmap</h4>
+        <ul class="roadmap-list">${stepsHtml}</ul>
+        <h4 style="margin-top: 18px;">Key skills to build</h4>
+        <ul class="roadmap-list">${skillsHtml}</ul>
+      </div>
+      <div class="action-row">
+        ${actionButtons}
+      </div>
+    `, 'Role roadmap');
+  }
+
+  function downloadRoadmapPDF(role) {
+    const roadmap = careerRoadmaps[role] || { steps: ['Master fundamentals', 'Build projects', 'Learn best practices'], skills: ['Core concepts', 'Tools', 'Problem solving'] };
+    const pdfContent = document.createElement('div');
+    pdfContent.style.cssText = 'font-family: Arial, sans-serif; padding: 40px; color: #1f2937; max-width: 800px; margin: 0 auto; background: white;';
+    
+    let stepsHtml = roadmap.steps.map((s, i) => `
+      <div style="display: flex; margin-bottom: 20px;">
+        <div style="background: #3b82f6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">${i+1}</div>
+        <div style="margin-left: 15px; padding-top: 4px; font-size: 16px; color: #374151;">${s}</div>
+      </div>
+    `).join('');
+    
+    pdfContent.innerHTML = `
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 36px; color: #111827; margin: 0 0 10px 0;">${role} Roadmap</h1>
+        <p style="font-size: 16px; color: #6b7280; margin: 0;">Your step-by-step guide to becoming a ${role}</p>
+      </div>
+
+      <h2 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px;">Learning Path</h2>
+      <div style="margin-bottom: 40px;">
+        ${stepsHtml}
+      </div>
+
+      <h2 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px;">Key Skills to Master</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        ${roadmap.skills.map(s => `<span style="background: #e5e7eb; color: #374151; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">${s}</span>`).join('')}
+      </div>
+
+      <div style="margin-top: 60px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+        Generated by PathBridge Career Dreamer
+      </div>
+    `;
+
+    const opt = {
+      margin: 10,
+      filename: `${role.replace(/\s+/g, '-')}-Roadmap.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    };
+
+    html2pdf().set(opt).from(pdfContent).save();
+  }
+
+  function renderCareers(list) {
+    careerGrid.innerHTML = '';
+    
+    if (!list.length) {
+      careerGrid.innerHTML = '<div class="role-card" style="grid-column: 1/-1;"><h3>No matching paths found</h3><p>Try another keyword.</p></div>';
+      return;
+    }
+
+    list.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'role-card dreamer-card';
+      card.className = 'role-card dreamer-card';
+      card.dataset.role = item.title;
+      card.innerHTML = `
+        <span class="role-title">${item.title}</span>
+        <div class="role-action-group">
+          <svg class="role-download" title="Download PDF" data-download="${item.title}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <svg class="role-bookmark" title="View Roadmap" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.role-download')) {
+          e.stopPropagation();
+          downloadRoadmapPDF(item.title);
+        } else {
+          renderRoadmap(item.title);
+        }
+      });
+      careerGrid.appendChild(card);
+    });
+
+    const createCard = document.createElement('div');
+    createCard.className = 'role-card dreamer-card create-roadmap-card';
+    createCard.innerHTML = `<span class="role-title">+ Create your own Roadmap</span>`;
+    careerGrid.appendChild(createCard);
+  }
+
+  function updateFilter() {
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = careerPaths.filter(item => {
+      const matchesQuery = query === '' || [item.title, item.desc, item.skills, item.category].some(text => text.toLowerCase().includes(query));
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      return matchesQuery && matchesCategory;
+    });
+    renderCareers(filtered);
+  }
+
+  searchInput.addEventListener('input', updateFilter);
+
+  categoryTags.forEach(tag => {
+    tag.addEventListener('click', () => {
+      categoryTags.forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      selectedCategory = tag.dataset.filter;
+      updateFilter();
+    });
+  });
+
+  hintChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      searchInput.value = chip.textContent;
+      updateFilter();
+    });
+  });
+
+  roleModal.addEventListener('click', function(event) {
+    if (event.target === roleModal) {
+      closeModal();
+    }
+  });
+
+  renderCareers(careerPaths);
+</script>
+
+  <footer class="site-footer">
+    <div class="footer-card">
+      <p>Explore more of PathBridge from here.</p>
+      <div class="footer-actions">
+        <a href="index.html" class="btn btn-outline">🏠 Home</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
