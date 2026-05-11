@@ -516,6 +516,142 @@ p.subtitle {
   font-weight: 600;
 }
 
+.cert-filter-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.cert-filter-btn:hover,
+.cert-filter-btn.active {
+  background: rgba(59,130,246,0.14);
+  border-color: rgba(59,130,246,0.4);
+  color: var(--accent-blue);
+  transform: translateY(-1px);
+}
+
+.certification-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.cert-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.cert-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59,130,246,0.35);
+  box-shadow: 0 18px 40px rgba(59,130,246,0.12);
+}
+.cert-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.cert-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.cert-card .cert-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.cert-card .cert-meta span {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.cert-card .cert-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cert-card .cert-footer .price-tag {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.cert-card .cert-footer .platform-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.cert-card a.btn-sm {
+  white-space: nowrap;
+}
+
+#costEstimatorList {
+  display: grid;
+  gap: 12px;
+}
+#costEstimatorList .estimator-item {
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+#costEstimatorList .estimator-item strong {
+  color: var(--text-primary);
+}
+#costTotal {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+.platform-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.platform-comparison th,
+.platform-comparison td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.platform-comparison th {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.platform-comparison td {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+.platform-comparison tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.02);
+}
+
+.platform-comparison .platform-name {
+  font-weight: 700;
+}
+
 /* Analytics Charts */
 .analytics-section { margin-top: 8px; }
 .chart-container {
@@ -1202,8 +1338,384 @@ p.subtitle {
 .gap-12 { display: flex; gap: 12px; flex-wrap: wrap; }
 .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
 
+/* ===== Certification Styles ===== */
+.certification-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.certification-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.certification-card:hover {
+  background: rgba(59,130,246,0.1);
+  border-color: var(--accent-blue);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(59,130,246,0.15);
+}
+
+.cert-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cert-icon {
+  font-size: 28px;
+}
+
+.cert-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.cert-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: rgba(59,130,246,0.2);
+  color: var(--accent-blue);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.cert-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 10px 0;
+}
+
+.cert-platforms {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.cert-platform-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 0.85rem;
+}
+
+.cert-platform-name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.cert-platform-price {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.cert-platform-free {
+  color: #10b981;
+  background: rgba(16,185,129,0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.platform-comparison {
+  overflow-x: auto;
+}
+
+.platform-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.platform-table th,
+.platform-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.platform-table th {
+  background: rgba(59,130,246,0.1);
+  color: var(--accent-blue);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.platform-table tr:hover {
+  background: rgba(59,130,246,0.05);
+}
+
+.platform-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-type {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+}
+
+.platform-type.free {
+  background: rgba(16,185,129,0.2);
+  color: #10b981;
+}
+
+.platform-type.paid {
+  background: rgba(59,130,246,0.2);
+  color: var(--accent-blue);
+}
+
+.price-range {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.price-range.high {
+  color: #ef4444;
+}
+
+.price-range.medium {
+  color: #f59e0b;
+}
+
+.price-range.low {
+  color: #10b981;
+}
+
+.cert-filter-btn {
+  transition: all 0.2s;
+}
+
+.cert-filter-btn:hover {
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.1);
+  color: var(--text-primary);
+}
+
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.5); }
+
+/* ===== Chatbot Styles ===== */
+.hidden { display: none !important; }
+
+.chatbot-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 998;
+}
+
+.chatbot-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(59,130,246,0.4);
+}
+
+.chatbot-toggle:active {
+  transform: scale(0.95);
+}
+
+.chatbot-panel {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 380px;
+  height: 500px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chatbot-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.chatbot-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.chatbot-close-btn:hover {
+  color: var(--text-primary);
+}
+
+.chatbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatbot-message {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 95%;
+  word-wrap: break-word;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chatbot-message.user {
+  background: rgba(59,130,246,0.2);
+  color: var(--text-primary);
+  align-self: flex-end;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+.chatbot-message.bot {
+  background: rgba(139,92,246,0.15);
+  color: var(--text-primary);
+  align-self: flex-start;
+  border: 1px solid rgba(139,92,246,0.2);
+}
+
+.chatbot-message.chatbot-status {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  align-self: flex-start;
+}
+
+.chatbot-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.chatbot-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+
+.chatbot-input::placeholder {
+  color: var(--text-muted);
+}
+
+.chatbot-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.1);
+  box-shadow: 0 0 10px rgba(59,130,246,0.2);
+}
+
+.chatbot-send-btn {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.chatbot-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 10px rgba(59,130,246,0.2);
+}
+
+.chatbot-send-btn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .chatbot-panel {
+    width: calc(100vw - 32px);
+    height: 400px;
+    bottom: 80px;
+    right: 16px;
+  }
+  
+  .chatbot-toggle {
+    bottom: 16px;
+    right: 16px;
+  }
+}
 ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
 
