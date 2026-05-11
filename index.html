@@ -139,5 +139,30 @@
   </footer>
 </div>
 
+<!-- Chatbot Panel -->
+<div id="chatbotPanel" class="chatbot-panel hidden">
+  <div class="chatbot-header">
+    <div class="chatbot-title">Career Advisor</div>
+    <button id="chatbotClose" class="chatbot-close-btn" aria-label="Close chatbot">✕</button>
+  </div>
+  <div id="chatbotMessages" class="chatbot-messages"></div>
+  <form id="chatbotForm" class="chatbot-form">
+    <input 
+      id="chatbotInput" 
+      type="text" 
+      class="chatbot-input" 
+      placeholder="Ask about resume, interview prep, skills..." 
+      autocomplete="off"
+    />
+    <button type="submit" class="chatbot-send-btn" aria-label="Send message">⬆</button>
+  </form>
+</div>
+
+<!-- Chatbot Toggle Button -->
+<button id="chatbotToggle" class="chatbot-toggle" aria-label="Open chatbot">
+  💬
+</button>
+
+<script src="chatbot (1).js"></script>
 </body>
 </html>
