@@ -22,7 +22,7 @@
 <div class="page-wrap" style="padding-top: 100px; gap: 24px;">
 
   <!-- Result Hero -->
-  <div class="card card-wide" style="animation-delay:0.05s;">
+  <div class="card-glass" style="animation-delay:0.05s; max-width: 1100px;">
     <div class="result-hero">
       <span class="section-badge">🎯 Your Personalized Results</span>
       <h1 class="page-title" style="font-size: clamp(1.5rem,4vw,2.4rem); margin-top: 12px;" id="resultHeadline">Calculating your matches…</h1>
@@ -33,6 +33,7 @@
     <div class="tab-row mt-32" id="tabRow">
       <button class="tab-btn active" onclick="showTab('careers', this)" id="tab-careers">🚀 Careers</button>
       <button class="tab-btn" onclick="showTab('courses', this)" id="tab-courses">📚 Courses</button>
+      <button class="tab-btn" onclick="showTab('certifications', this)" id="tab-certifications">🎓 Certifications</button>
       <button class="tab-btn" onclick="showTab('analytics', this)" id="tab-analytics">📊 Analytics</button>
     </div>
 
@@ -49,6 +50,64 @@
       <p class="text-muted mt-8" style="margin-bottom: 20px;">Top recommended courses based on your background and goals</p>
       <div class="course-grid" id="courseGrid">
         <p class="text-muted">Loading…</p>
+      </div>
+    </div>
+
+    <!-- TAB: Certifications & Cost Estimator -->
+    <div class="tab-pane" id="pane-certifications">
+      <p class="text-muted mt-8" style="margin-bottom: 20px;">Explore industry-recognized certifications with real pricing across free and paid platforms</p>
+
+      <!-- Filter Row -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 10px; color: var(--text-secondary); font-weight: 600;">Filter by skill category:</label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="certFilterRow">
+          <button class="cert-filter-btn active" onclick="filterCertifications('all', this)">All</button>
+          <button class="cert-filter-btn" onclick="filterCertifications('tech', this)">💻 Tech & Programming</button>
+          <button class="cert-filter-btn" onclick="filterCertifications('data', this)">📊 Data & Analytics</button>
+          <button class="cert-filter-btn" onclick="filterCertifications('business', this)">💼 Business & Management</button>
+          <button class="cert-filter-btn" onclick="filterCertifications('design', this)">🎨 Design & Creative</button>
+        </div>
+      </div>
+
+      <!-- Certification Cards Grid -->
+      <div class="certification-grid" id="certificationGrid"></div>
+
+      <!-- Cost Estimator -->
+      <div style="margin-top: 40px; padding: 28px; background: linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.08)); border-radius: 16px; border: 1px solid rgba(59,130,246,0.25);">
+        <h3 style="color: var(--text-primary); margin-bottom: 6px;">🧮 Cost Estimator</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">Select certifications to calculate your total learning investment</p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
+          <label style="color: var(--text-secondary); font-size: 0.9rem;">Your currency:</label>
+          <select id="currencySelect" onchange="updateCostEstimator()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 14px; border-radius: 8px; cursor: pointer;">
+            <option value="INR">🇮🇳 INR (₹)</option>
+            <option value="USD">🇺🇸 USD ($)</option>
+          </select>
+        </div>
+        <div id="costEstimatorList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;"></div>
+        <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: var(--text-secondary); font-weight: 600;">Estimated Total Investment:</span>
+          <span id="costTotal" style="font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">₹0</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 10px;">* Prices shown are approximate. Udemy prices are after typical discount. Coursera shows monthly subscription rate.</p>
+      </div>
+
+      <!-- Platform Comparison Table -->
+      <div style="margin-top: 40px; padding: 28px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid var(--border);">
+        <h3 style="color: var(--text-primary); margin-bottom: 18px;">🏆 Platform Comparison</h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <th style="text-align: left; padding: 12px 10px; color: var(--text-secondary);">Platform</th>
+                <th style="text-align: center; padding: 12px 10px; color: var(--text-secondary);">Type</th>
+                <th style="text-align: center; padding: 12px 10px; color: var(--text-secondary);">Avg. Cost</th>
+                <th style="text-align: center; padding: 12px 10px; color: var(--text-secondary);">Certificate</th>
+                <th style="text-align: center; padding: 12px 10px; color: var(--text-secondary);">Best For</th>
+              </tr>
+            </thead>
+            <tbody id="platformTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -620,6 +679,140 @@ function renderRoadmap(role) {
   `, 'Role roadmap');
 }
 
+// ──────────────── CERTIFICATIONS DATA ────────────────
+const certDB = [
+  // TECH
+  { id:'c1', cat:'tech', name:'Google IT Support', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'6 months', level:'Beginner', url:'https://www.coursera.org/professional-certificates/google-it-support', desc:'Covers troubleshooting, networking, OS, and security. Backed by Google.', isFree:false },
+  { id:'c2', cat:'tech', name:'The Web Developer Bootcamp', platform:'Udemy', logo:'🎯', cost_usd:15, cost_inr:1299, per:'one-time', duration:'63 hrs', level:'Beginner', url:'https://www.udemy.com/course/the-web-developer-bootcamp/', desc:'HTML, CSS, JavaScript, Node.js, MongoDB — the complete stack.', isFree:false },
+  { id:'c3', cat:'tech', name:'Responsive Web Design', platform:'freeCodeCamp', logo:'🔥', cost_usd:0, cost_inr:0, per:'free', duration:'300 hrs', level:'Beginner', url:'https://www.freecodecamp.org/learn/2022/responsive-web-design/', desc:'Free, project-based curriculum covering HTML & CSS fundamentals.', isFree:true },
+  { id:'c4', cat:'tech', name:'Full-Stack Engineer Path', platform:'Codecademy', logo:'💡', cost_usd:17.99, cost_inr:1499, per:'month', duration:'6 months', level:'Intermediate', url:'https://www.codecademy.com/learn/paths/full-stack-engineer-career-path', desc:'End-to-end web dev: front-end, back-end, and databases.', isFree:false },
+  { id:'c5', cat:'tech', name:'AWS Cloud Practitioner', platform:'Pluralsight', logo:'📐', cost_usd:29, cost_inr:2400, per:'month', duration:'10 hrs', level:'Beginner', url:'https://www.pluralsight.com/cloud-guru/courses/aws-certified-cloud-practitioner-clf-c02', desc:'Foundation for AWS cloud knowledge and best practices.', isFree:false },
+  { id:'c6', cat:'tech', name:'JavaScript Algorithms & DS', platform:'freeCodeCamp', logo:'🔥', cost_usd:0, cost_inr:0, per:'free', duration:'300 hrs', level:'Intermediate', url:'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/', desc:'Master JS fundamentals, algorithms, and data structures. 100% free.', isFree:true },
+  { id:'c7', cat:'tech', name:'Microsoft Azure Fundamentals', platform:'Udemy', logo:'🎯', cost_usd:14, cost_inr:1199, per:'one-time', duration:'9 hrs', level:'Beginner', url:'https://www.udemy.com/course/azure-fundamentals/', desc:'Learn Azure cloud services, pricing, and core architecture.', isFree:false },
+  { id:'c8', cat:'tech', name:'Google Cloud Fundamentals', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'4 months', level:'Beginner', url:'https://www.coursera.org/professional-certificates/google-cloud-it-automation', desc:'Cloud infrastructure, automation, and Google Cloud services.', isFree:false },
+  // DATA
+  { id:'d1', cat:'data', name:'Data Scientist with Python', platform:'DataCamp', logo:'📊', cost_usd:25, cost_inr:2083, per:'month', duration:'90 hrs', level:'Intermediate', url:'https://www.datacamp.com/tracks/data-scientist-professional-with-python', desc:'Python, Pandas, ML, visualization — comprehensive data science track.', isFree:false },
+  { id:'d2', cat:'data', name:'IBM Data Science', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'11 months', level:'Beginner', url:'https://www.coursera.org/professional-certificates/ibm-data-science', desc:'10-course series covering Python, SQL, ML, and data visualization.', isFree:false },
+  { id:'d3', cat:'data', name:'Machine Learning A-Z', platform:'Udemy', logo:'🎯', cost_usd:15, cost_inr:1299, per:'one-time', duration:'44 hrs', level:'Intermediate', url:'https://www.udemy.com/course/machinelearning/', desc:'Python & R implementations of ML algorithms with real projects.', isFree:false },
+  { id:'d4', cat:'data', name:'Data Analysis with Python', platform:'freeCodeCamp', logo:'🔥', cost_usd:0, cost_inr:0, per:'free', duration:'300 hrs', level:'Intermediate', url:'https://www.freecodecamp.org/learn/data-analysis-with-python/', desc:'NumPy, Pandas, Matplotlib — 100% free with certification.', isFree:true },
+  { id:'d5', cat:'data', name:'Data Engineering Track', platform:'DataCamp', logo:'📊', cost_usd:25, cost_inr:2083, per:'month', duration:'60 hrs', level:'Advanced', url:'https://www.datacamp.com/tracks/data-engineer-in-python', desc:'Pipelines, Spark, Airflow, and cloud data engineering.', isFree:false },
+  { id:'d6', cat:'data', name:'SQL for Data Science', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'4 months', level:'Beginner', url:'https://www.coursera.org/learn/sql-for-data-science', desc:'SQL querying, databases, and data analysis on real datasets.', isFree:false },
+  { id:'d7', cat:'data', name:'Machine Learning A-Z', platform:'Udemy', logo:'🎯', cost_usd:16, cost_inr:1399, per:'one-time', duration:'44 hrs', level:'Intermediate', url:'https://www.udemy.com/course/machinelearning/', desc:'Apply ML algorithms in Python and R with real-life examples.', isFree:false },
+  // BUSINESS
+  { id:'b1', cat:'business', name:'Google Project Management', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'6 months', level:'Beginner', url:'https://www.coursera.org/professional-certificates/google-project-management', desc:'Agile, Scrum, stakeholder management. Google-certified.', isFree:false },
+  { id:'b2', cat:'business', name:'MBA Business Essentials', platform:'Udemy', logo:'🎯', cost_usd:15, cost_inr:1299, per:'one-time', duration:'20 hrs', level:'Intermediate', url:'https://www.udemy.com/course/business-analysis-fundamentals/', desc:'Core business concepts, strategy, finance, and marketing.', isFree:false },
+  { id:'b3', cat:'business', name:'Digital Marketing', platform:'Codecademy', logo:'💡', cost_usd:17.99, cost_inr:1499, per:'month', duration:'4 months', level:'Beginner', url:'https://www.codecademy.com/learn/paths/digital-marketing', desc:'SEO, SEM, social media, and analytics fundamentals.', isFree:false },
+  { id:'b4', cat:'business', name:'Business Foundations', platform:'Coursera', logo:'🎓', cost_usd:0, cost_inr:0, per:'free (audit)', duration:'3 months', level:'Beginner', url:'https://www.coursera.org/specializations/wharton-business-foundations', desc:'Wharton School: accounting, finance, marketing — auditable free.', isFree:true },
+  { id:'b5', cat:'business', name:'Agile Project Management', platform:'Udemy', logo:'🎯', cost_usd:15, cost_inr:1299, per:'one-time', duration:'16 hrs', level:'Beginner', url:'https://www.udemy.com/course/agile-project-management/', desc:'Learn Agile ceremonies, Scrum roles, and practical project delivery.', isFree:false },
+  // DESIGN
+  { id:'g1', cat:'design', name:'UI / UX Design', platform:'Coursera', logo:'🎓', cost_usd:49, cost_inr:4100, per:'month', duration:'6 months', level:'Beginner', url:'https://www.coursera.org/professional-certificates/google-ux-design', desc:'Google UX Design Certificate — Figma, wireframes, user research.', isFree:false },
+  { id:'g2', cat:'design', name:'Graphic Design Masterclass', platform:'Udemy', logo:'🎯', cost_usd:15, cost_inr:1299, per:'one-time', duration:'25 hrs', level:'Beginner', url:'https://www.udemy.com/course/graphic-design-masterclass-everything-you-need-to-know/', desc:'Photoshop, Illustrator, InDesign — full creative suite training.', isFree:false },
+  { id:'g3', cat:'design', name:'Design for Beginners', platform:'Pluralsight', logo:'📐', cost_usd:29, cost_inr:2400, per:'month', duration:'8 hrs', level:'Beginner', url:'https://www.pluralsight.com/paths/design', desc:'Visual principles, color theory, typography and layout basics.', isFree:false },
+];
+
+const platformMeta = [
+  { name:'Coursera',    logo:'🎓', type:'Subscription / Audit', avgCost:'$49/mo (₹4,100)',  cert:'✅ Industry certs', bestFor:'Professional certificates, University degrees' },
+  { name:'Udemy',       logo:'🎯', type:'One-time Purchase',     avgCost:'$10–15 (₹799–1,299)', cert:'✅ Completion cert', bestFor:'Project-based skills, large library' },
+  { name:'DataCamp',    logo:'📊', type:'Subscription',          avgCost:'$25/mo (₹2,083)',  cert:'✅ Skill certs',   bestFor:'Data science & analytics tracks' },
+  { name:'Codecademy',  logo:'💡', type:'Subscription',          avgCost:'$17.99/mo (₹1,499)',cert:'✅ Career paths',  bestFor:'Beginners, interactive coding' },
+  { name:'freeCodeCamp',logo:'🔥', type:'100% Free',             avgCost:'Free',              cert:'✅ Free cert',    bestFor:'Web dev, data analysis, JS' },
+  { name:'Pluralsight', logo:'📐', type:'Subscription',          avgCost:'$29/mo (₹2,400)',  cert:'✅ Skill certs',   bestFor:'Tech skills, cloud & DevOps' },
+];
+
+let selectedCerts = {};
+let currentCurrency = 'INR';
+let currentCertFilter = 'all';
+
+function renderCertifications(filter) {
+  currentCertFilter = filter;
+  const grid = document.getElementById('certificationGrid');
+  const list = filter === 'all' ? certDB : certDB.filter(c => c.cat === filter);
+  grid.innerHTML = list.map(c => {
+    const cost = currentCurrency === 'INR'
+      ? (c.isFree ? '<span style="color:#22c55e;font-weight:700;">FREE</span>' : `₹${c.cost_inr.toLocaleString('en-IN')} <small style="font-weight:400;color:var(--text-secondary);">/${c.per}</small>`)
+      : (c.isFree ? '<span style="color:#22c55e;font-weight:700;">FREE</span>' : `$${c.cost_usd} <small style="font-weight:400;color:var(--text-secondary);">/${c.per}</small>`);
+    const levelColor = { Beginner:'#22c55e', Intermediate:'#f59e0b', Advanced:'#ef4444' }[c.level] || '#94a3b8';
+    const checked = selectedCerts[c.id] ? 'checked' : '';
+    return `
+      <div class="cert-card" data-id="${c.id}" data-cat="${c.cat}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:1.3rem;">${c.logo}</span>
+              <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">${c.platform}</span>
+              <span style="font-size:0.72rem;padding:2px 8px;border-radius:20px;background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44;">${c.level}</span>
+            </div>
+            <h4 style="margin:0 0 6px;font-size:1rem;color:var(--text-primary);">${c.name}</h4>
+            <p style="margin:0 0 10px;font-size:0.84rem;color:var(--text-secondary);">${c.desc}</p>
+            <div style="display:flex;gap:16px;font-size:0.82rem;color:var(--text-secondary);">
+              <span>⏱ ${c.duration}</span>
+              <span style="font-size:1rem;font-weight:700;color:var(--text-primary);">${cost}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0;">
+            <a href="${c.url}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="white-space:nowrap;">🔗 Enroll</a>
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" ${checked} onchange="toggleCertSelection('${c.id}', this.checked)" style="accent-color:var(--accent-blue);width:14px;height:14px;"> Add to estimate
+            </label>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  renderPlatformTable();
+  updateCostEstimator();
+}
+
+function renderPlatformTable() {
+  const tbody = document.getElementById('platformTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = platformMeta.map((p, i) => `
+    <tr style="border-bottom: 1px solid var(--border); ${i % 2 === 0 ? 'background:rgba(255,255,255,0.01);' : ''}">
+      <td style="padding:12px 10px;color:var(--text-primary);font-weight:600;">${p.logo} ${p.name}</td>
+      <td style="padding:12px 10px;text-align:center;"><span style="font-size:0.8rem;padding:3px 10px;background:rgba(59,130,246,0.12);border-radius:20px;color:var(--accent-blue);">${p.type}</span></td>
+      <td style="padding:12px 10px;text-align:center;color:var(--text-primary);font-weight:600;">${p.avgCost}</td>
+      <td style="padding:12px 10px;text-align:center;">${p.cert}</td>
+      <td style="padding:12px 10px;text-align:center;color:var(--text-secondary);font-size:0.82rem;">${p.bestFor}</td>
+    </tr>`).join('');
+}
+
+function filterCertifications(cat, btn) {
+  document.querySelectorAll('.cert-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCertifications(cat);
+}
+
+function toggleCertSelection(id, checked) {
+  if (checked) selectedCerts[id] = true;
+  else delete selectedCerts[id];
+  updateCostEstimator();
+}
+
+function updateCostEstimator() {
+  currentCurrency = document.getElementById('currencySelect')?.value || 'INR';
+  const selected = certDB.filter(c => selectedCerts[c.id]);
+  const listEl = document.getElementById('costEstimatorList');
+  const totalEl = document.getElementById('costTotal');
+  if (!listEl || !totalEl) return;
+  if (!selected.length) {
+    listEl.innerHTML = '<p style="color:var(--text-secondary);font-size:0.88rem;">☝️ Check "Add to estimate" on any certification above to include it here.</p>';
+    totalEl.textContent = currentCurrency === 'INR' ? '₹0' : '$0';
+    return;
+  }
+  let total = 0;
+  listEl.innerHTML = selected.map(c => {
+    const cost = currentCurrency === 'INR' ? c.cost_inr : c.cost_usd;
+    const sym = currentCurrency === 'INR' ? '₹' : '$';
+    const costLabel = c.isFree ? 'FREE' : `${sym}${cost.toLocaleString()} /${c.per}`;
+    if (!c.isFree) total += cost;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+      <span style="color:var(--text-primary);font-size:0.88rem;">${c.logo} <strong>${c.name}</strong> <span style="color:var(--text-secondary);">(${c.platform})</span></span>
+      <span style="font-weight:700;color:${c.isFree ? '#22c55e' : 'var(--text-primary)'}">${costLabel}</span>
+    </div>`;
+  }).join('');
+  const sym = currentCurrency === 'INR' ? '₹' : '$';
+  totalEl.textContent = `${sym}${total.toLocaleString()}`;
+}
+
 // ──────────────── TABS ────────────────
 function showTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -627,7 +820,6 @@ function showTab(id, btn) {
   document.getElementById('pane-' + id).classList.add('active');
   btn.classList.add('active');
 
-  // Re-animate bars when analytics tab opened
   if (id === 'analytics') {
     setTimeout(() => {
       document.querySelectorAll('.bar-fill').forEach(el => {
@@ -635,8 +827,36 @@ function showTab(id, btn) {
       });
     }, 100);
   }
+  if (id === 'certifications') {
+    renderCertifications(currentCertFilter);
+  }
 }
 </script>
 
+<!-- Chatbot Panel -->
+<div id="chatbotPanel" class="chatbot-panel hidden">
+  <div class="chatbot-header">
+    <div class="chatbot-title">Career Advisor</div>
+    <button id="chatbotClose" class="chatbot-close-btn" aria-label="Close chatbot">✕</button>
+  </div>
+  <div id="chatbotMessages" class="chatbot-messages"></div>
+  <form id="chatbotForm" class="chatbot-form">
+    <input 
+      id="chatbotInput" 
+      type="text" 
+      class="chatbot-input" 
+      placeholder="Ask about resume, interview prep, skills..." 
+      autocomplete="off"
+    />
+    <button type="submit" class="chatbot-send-btn" aria-label="Send message">⬆</button>
+  </form>
+</div>
+
+<!-- Chatbot Toggle Button -->
+<button id="chatbotToggle" class="chatbot-toggle" aria-label="Open chatbot">
+  💬
+</button>
+
+<script src="chatbot (1).js"></script>
 </body>
 </html>
